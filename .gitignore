@@ -1,0 +1,14 @@
+.idea
+*settings.ini
+*.pyc
+*.db
+*db.sqlite3
+uploads
+.DS_Store
+.venv
+.vscode
+local.sh
+local_shell.sh
+fix_settings.sh
+*.esenv
+*.es

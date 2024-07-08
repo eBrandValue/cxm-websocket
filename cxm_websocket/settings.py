@@ -127,3 +127,39 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CACHE_TYPE = "redis"
+
+if CACHE_TYPE == "redis":
+    CACHE_LOCATION = "redis://redis-cxm.cxm.svc.cluster.local:6379"
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [CACHE_LOCATION], "capacity": 1000},
+        },
+    }
+    import redis
+
+    from redis.backoff import FullJitterBackoff
+    from redis.retry import Retry
+
+    CACHE_CONN = redis.from_url(CACHE_LOCATION)
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": CACHE_LOCATION,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "SOCKET_CONNECT_TIMEOUT": 10,
+                "SOCKET_TIMEOUT": 60,
+                "CONNECTION_POOL_KWARGS": {
+                    "socket_keepalive": True,
+                    "health_check_interval": 30,
+                    "retry_on_timeout": True,
+                    "retry": Retry(FullJitterBackoff(cap=5, base=1), 5),
+                },
+            },
+        }
+    }
+elif CACHE_TYPE == "dummy":
+    CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
