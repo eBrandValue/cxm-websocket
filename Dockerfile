@@ -11,4 +11,4 @@ COPY . .
 
 EXPOSE 8008
 
-RUN ["python", "./cxm_websocket/server.py"]
+CMD ["python", "./cxm_websocket/server.py"]
