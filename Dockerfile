@@ -5,6 +5,7 @@ WORKDIR $APPDIR
 COPY ./requirements.txt .
 RUN pip install --use-deprecated=legacy-resolver --no-cache-dir -r requirements.txt
 ENV PYTHONPATH .
+ENV DJANGO_SETTINGS_MODULE cxm_websocket.settings
 
 CMD python
 
