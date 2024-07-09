@@ -9,6 +9,6 @@ ENV DJANGO_SETTINGS_MODULE cxm_websocket.settings
 
 COPY . .
 
-EXPOSE 8008
+EXPOSE 8000
 
 CMD ["python", "./cxm_websocket/server.py"]
