@@ -1,6 +1,7 @@
 uvicorn==0.22.0
 asgiref==3.7.2
-channels==3.0.1
+channels==3.0.3
 daphne==3.0.2
 channels-redis==4.1.0
 redis==5.0.7
+demjson3==3.0.5
