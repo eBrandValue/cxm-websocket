@@ -1,6 +1,7 @@
 FROM python:3.10.12
 
-WORKDIR /usr/src/app
+ENV APPDIR /usr/src/app
+WORKDIR $APPDIR
 COPY ./requirements.txt .
 RUN pip install --use-deprecated=legacy-resolver --no-cache-dir -r requirements.txt
 ENV PYTHONPATH .
@@ -11,4 +12,4 @@ COPY . .
 
 EXPOSE 8008
 
-RUN ["server.py"]
+RUN ["python", "./cxm_websocket/server.py"]
