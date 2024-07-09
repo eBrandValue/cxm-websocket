@@ -7,8 +7,6 @@ RUN pip install --use-deprecated=legacy-resolver --no-cache-dir -r requirements.
 ENV PYTHONPATH .
 ENV DJANGO_SETTINGS_MODULE cxm_websocket.settings
 
-CMD python
-
 COPY . .
 
 EXPOSE 8008
