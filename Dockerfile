@@ -9,6 +9,10 @@ ENV DJANGO_SETTINGS_MODULE cxm_websocket.settings
 
 COPY . .
 
-EXPOSE 8000
+RUN apt-get update && apt-get install -y nginx
 
-CMD ["daphne", "cxm_websocket.asgi:application"]
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 8000 80
+
+CMD service nginx start && daphne -b 0.0.0.0 -p 8000 cxm_websocket.asgi:application
