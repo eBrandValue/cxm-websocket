@@ -11,4 +11,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["python", "./cxm_websocket/server.py"]
+CMD ["daphne", "cxm_websocket.asgi:application"]
