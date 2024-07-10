@@ -1,4 +1,4 @@
-FROM python:3.10.12
+FROM python:3.7.17
 
 ENV APPDIR /usr/src/app
 WORKDIR $APPDIR
