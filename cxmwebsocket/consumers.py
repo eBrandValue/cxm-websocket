@@ -1,9 +1,10 @@
-import json
 import logging
 import urllib
 import demjson3
-from channels.generic.websocket import AsyncWebsocketConsumer, JsonWebsocketConsumer, AsyncJsonWebsocketConsumer
+import random
+import string
 
+from channels.generic.websocket import AsyncWebsocketConsumer, AsyncJsonWebsocketConsumer
 
 LOGGER = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class ConversationConsumer(BaseConsumer):
 
     @property
     def group_name(self):
-        return "%s_%s_%s" % (self.CHANNEL_NAME, self.company_id, self.user_id)
+        return "%s_%s" % (self.CHANNEL_NAME, self.company_id)
 
     async def connect(self):
         if self.initial_parse():
@@ -93,17 +94,41 @@ class ConversationRedirectToUser(BaseConsumer):
 
 
 class Router(AsyncWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = None
+
+    @staticmethod
+    def generate_name(length=7):
+        characters = string.ascii_letters + string.digits + '-.'
+        return ''.join(random.choice(characters) for _ in range(length))
+
     async def connect(self):
+        try:
+            keys = [t for t in self.scope["headers"] if t[0].startswith(b'sec-websocket-key')]
+            self.name = keys[0][1].decode().replace("=", "").replace("/", "").replace("+", "")
+        except Exception as e:
+            LOGGER.error("Error occurred when generating client name, error: %s" % e)
+            self.name = self.generate_name()
+
+        await self.channel_layer.group_add(
+            self.name,
+            self.channel_name
+        )
         await self.accept()
 
     async def disconnect(self, close_code):
-        pass
+        await self.channel_layer.group_discard(
+            self.name,
+            self.channel_name
+        )
 
     async def receive(self, text_data):
         data = text_data
-        if type(data) is str and data == '__ping__':
+        if type(data) is str and (data == '__ping__' or data == '"__ping__"'):
             await self.send(text_data="__pong__")
         else:
+            LOGGER.info("Received updated data, sending it to the groups. data: %s", data)
             data = demjson3.decode(data)
             channel_type = data.get("channel_type")
             channel_name = data.get("channel_name")
