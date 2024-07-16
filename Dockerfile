@@ -14,7 +14,8 @@ COPY . .
 RUN apt-get update && apt-get install -y nginx
 
 COPY nginx.conf /etc/nginx/nginx.conf
+RUN rm /etc/nginx/conf.d/default.conf
 
-EXPOSE 8000 80
+EXPOSE 80 443 8000
 
 CMD service nginx start && daphne -b 0.0.0.0 -p 8000 cxm_websocket.asgi:application
