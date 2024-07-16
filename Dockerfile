@@ -13,6 +13,8 @@ COPY . .
 
 RUN apt-get update && apt-get install -y nginx && apt-get install nano && apt-get install -y certbot python3-certbot-nginx
 
+CMD certbot certonly --nginx
+
 #COPY nginx2.conf /etc/nginx/sites-available/ws.conf
 COPY nginx3.conf /etc/nginx/sites-available/nginx.conf
 
