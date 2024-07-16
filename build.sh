@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Containerization is started with bare-metal repository"
-docker build -t 10.15.1.132:30000/ebv/cxm-websocket:latest --network=host .
+docker build --no-cache -t 10.15.1.132:30000/ebv/cxm-websocket:latest --network=host .
 docker push 10.15.1.132:30000/ebv/cxm-websocket:latest
 echo "Containerization is finished with bare-metal repository"
 
