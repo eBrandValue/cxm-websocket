@@ -11,7 +11,7 @@ ENV DJANGO_SETTINGS_MODULE cxm_websocket.settings
 
 COPY . .
 
-RUN apt-get update && apt-get install -y nginx
+RUN apt-get update && apt-get install -y nginx && apt-get install nano
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
