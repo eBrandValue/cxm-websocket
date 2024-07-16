@@ -14,7 +14,7 @@ COPY . .
 RUN apt-get update && apt-get install -y nginx && apt-get install nano && apt-get install -y certbot python3-certbot-nginx
 
 #COPY nginx2.conf /etc/nginx/sites-available/ws.conf
-COPY nginx3.conf /etc/nginx/nginx.conf
+COPY nginx3.conf /etc/nginx/sites-available/nginx.conf
 
 EXPOSE 80 443 8000
 
