@@ -24,10 +24,10 @@ class BaseConsumer(AsyncJsonWebsocketConsumer):
         try:
             token = [t for t in self.scope["headers"] if t[0].startswith(b'sec-websocket-protocol')][0][1].decode()
             keys = token.split(", ")
-            LOGGER.info("keys", keys)
+            LOGGER.info("keys: %s" % keys)
             if keys and keys[1] == settings.HANDSHAKE_TOKEN and keys[0] == "cxm":
                 query_dict = urllib.parse.parse_qs(self.scope['query_string'])
-                LOGGER.info("query_dict", query_dict)
+                LOGGER.info("query_dict: %s" % query_dict)
                 self.company_id = query_dict[b"companyId"][0].decode()
                 self.user_id = query_dict[b"userId"][0].decode()
                 if self.company_id and self.user_id:
