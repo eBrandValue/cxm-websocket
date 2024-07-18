@@ -30,6 +30,7 @@ if DEBUG:
 else:
     ALLOWED_HOSTS = ['.engagecxm.com', 'localhost']
 
+HANDSHAKE_TOKEN = os.environ.get("HANDSHAKE_TOKEN", None)
 
 # Application definition
 

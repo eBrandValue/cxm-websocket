@@ -4,6 +4,7 @@ import demjson3
 import random
 import string
 
+from django.conf import settings
 from channels.generic.websocket import AsyncWebsocketConsumer, AsyncJsonWebsocketConsumer
 
 LOGGER = logging.getLogger(__name__)
@@ -21,10 +22,14 @@ class BaseConsumer(AsyncJsonWebsocketConsumer):
 
     def initial_parse(self):
         try:
-            query_dict = urllib.parse.parse_qs(self.scope['query_string'])
-            self.company_id = query_dict[b"companyId"][0].decode()
-            self.user_id = query_dict[b"userId"][0].decode()
-            return True
+            token = [t for t in self.scope["headers"] if t[0].startswith(b'sec-websocket-protocol')][0][1].decode()
+            keys = token.split(", ")
+            if keys and keys[1] == settings.HANDSHAKE_TOKEN and keys[0] == "cxm":
+                query_dict = urllib.parse.parse_qs(self.scope['query_string'])
+                self.company_id = query_dict[b"companyId"][0].decode()
+                self.user_id = query_dict[b"userId"][0].decode()
+                if self.company_id and self.user_id:
+                    return True
         except Exception as e:
             LOGGER.error("Error when parsing initial WS connection URI, %s" % e)
 
@@ -40,9 +45,8 @@ class NotificationConsumer(BaseConsumer):
 
     async def connect(self):
         if self.initial_parse():
-            await self.accept()
+            await self.accept("cxm")
             LOGGER.info("%s connected to %s" % (self.user_id, self.group_name))  # user email
-            print(self.group_name)
             await self.channel_layer.group_add(self.group_name, self.channel_name)
 
     async def disconnect(self, close_code):
@@ -62,7 +66,7 @@ class ConversationConsumer(BaseConsumer):
 
     async def connect(self):
         if self.initial_parse():
-            await self.accept()
+            await self.accept("cxm")
             LOGGER.info("%s connected to %s" % (self.user_id, self.group_name))  # user email
             await self.channel_layer.group_add(self.group_name, self.channel_name)
 
@@ -81,7 +85,7 @@ class ConversationRedirectToUser(BaseConsumer):
 
     async def connect(self):
         if self.initial_parse():
-            await self.accept()
+            await self.accept("cxm")
             LOGGER.info("%s connected to %s" % (self.user_id, self.group_name))  # user email
             await self.channel_layer.group_add(self.group_name, self.channel_name)
 
