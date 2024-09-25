@@ -139,5 +139,5 @@ class Router(AsyncWebsocketConsumer):
             LOGGER.info("Received updated data, sending it to the groups. data: %s", data)
             decoded_data = demjson3.decode(data)
             data = decoded_data.get("data")
-            channel_type, channel_name = data.get("channel_type"), data.get("channel_name")
+            channel_type, channel_name = decoded_data.get("channel_type"), decoded_data.get("channel_name")
             await self.channel_layer.group_send(channel_name, {"type": channel_type, "data": data})
