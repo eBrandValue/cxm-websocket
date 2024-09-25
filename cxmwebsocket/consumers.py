@@ -81,9 +81,11 @@ class ConversationConsumer(BaseConsumer):
 
 
 class ConversationRedirectToUser(BaseConsumer):
+    CHANNEL_NAME = "user"
+
     @property
     def group_name(self):
-        return "user_%s_%s" % (self.company_id, self.user_id)
+        return "%s_%s_%s" % (self.CHANNEL_NAME, self.company_id, self.user_id)
 
     async def connect(self):
         if self.initial_parse():
@@ -135,7 +137,7 @@ class Router(AsyncWebsocketConsumer):
             await self.send(text_data="__pong__")
         else:
             LOGGER.info("Received updated data, sending it to the groups. data: %s", data)
-            data = demjson3.decode(data)
-            channel_type = data.get("channel_type")
-            channel_name = data.get("channel_name")
-            await self.channel_layer.group_send(channel_name, {"type": channel_type, "data": data.get("data")})
+            decoded_data = demjson3.decode(data)
+            data = decoded_data.get("data")
+            channel_type, channel_name = data.get("channel_type"), data.get("channel_name")
+            await self.channel_layer.group_send(channel_name, {"type": channel_type, "data": data})
