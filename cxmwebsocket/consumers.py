@@ -38,66 +38,33 @@ class BaseConsumer(AsyncJsonWebsocketConsumer):
         return False
 
 
-class NotificationConsumer(BaseConsumer):
-    CHANNEL_NAME = "notification"
+class Consumerinho(BaseConsumer):
+    CHANNEL_NAME = "cxm"
 
     @property
-    def group_name(self):
-        return "%s_%s_%s" % (self.CHANNEL_NAME, self.company_id, self.user_id)
+    def company_group(self):
+        return "%s_company_%s" % (self.CHANNEL_NAME, self.company_id)
+
+    @property
+    def user_group(self):
+        return "%s_user_%s" % (self.CHANNEL_NAME, self.user_id)
 
     async def connect(self):
         if self.initial_parse():
             await self.accept("cxm")
-            LOGGER.info("%s connected to %s" % (self.user_id, self.group_name))  # user email
-            await self.channel_layer.group_add(self.group_name, self.channel_name)
+            await self.channel_layer.group_add(self.company_group, self.channel_name)
+            await self.channel_layer.group_add(self.user_group, self.channel_name)
+            LOGGER.info("%s connected to %s and %s" % (self.user_id, self.company_group, self.user_group))
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.CHANNEL_NAME, self.channel_name)
-        LOGGER.info("%s disconnected from %s" % (self.company_id, self.CHANNEL_NAME))
+        await self.channel_layer.group_discard(self.company_group, self.channel_name)
+        await self.channel_layer.group_discard(self.user_group, self.channel_name)
+        LOGGER.info("%s disconnected from %s and %s" % (self.user_id, self.company_group, self.user_group))
 
-    async def send_notification_message(self, event):
+    async def send_to_user(self, event):
         await self.send_json(event["data"])
 
-
-class ConversationConsumer(BaseConsumer):
-    CHANNEL_NAME = "conversation"
-
-    @property
-    def group_name(self):
-        return "%s_%s" % (self.CHANNEL_NAME, self.company_id)
-
-    async def connect(self):
-        if self.initial_parse():
-            await self.accept("cxm")
-            LOGGER.info("%s connected to %s" % (self.user_id, self.group_name))  # user email
-            await self.channel_layer.group_add(self.group_name, self.channel_name)
-
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.CHANNEL_NAME, self.channel_name)
-        LOGGER.info("%s disconnected from %s" % (self.company_id, self.CHANNEL_NAME))
-
-    async def send_conversation_to_user(self, event):
-        await self.send_json(event["data"])
-
-
-class ConversationRedirectToUser(BaseConsumer):
-    CHANNEL_NAME = "user"
-
-    @property
-    def group_name(self):
-        return "%s_%s_%s" % (self.CHANNEL_NAME, self.company_id, self.user_id)
-
-    async def connect(self):
-        if self.initial_parse():
-            await self.accept("cxm")
-            LOGGER.info("%s connected to %s" % (self.user_id, self.group_name))  # user email
-            await self.channel_layer.group_add(self.group_name, self.channel_name)
-
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
-        LOGGER.info("%s disconnected from %s" % (self.company_id, self.group_name))
-
-    async def send_conversation_to_user(self, event):
+    async def send_to_company(self, event):
         await self.send_json(event["data"])
 
 
